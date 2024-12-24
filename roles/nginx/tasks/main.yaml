@@ -1,0 +1,36 @@
+# Установка Nginx
+- name: Install Nginx
+  apt:
+    name: nginx  # Устанавливаем веб-сервер Nginx
+    state: present
+    update_cache: yes  # Обновляем кэш перед установкой
+
+# Запуск и настройка автозапуска Nginx
+- name: Start and enable Nginx
+  systemd:
+    name: nginx  # Указываем имя службы
+    state: started  # Убеждаемся, что служба запущена
+    enabled: yes    # Настраиваем автозапуск службы при загрузке системы
+
+# Создание конфигурации Nginx для Django
+- name: Create Nginx config for Django
+  copy: 
+    src: ../templates/nginx.conf # Шаблон конфигурации
+    dest: /etc/nginx/sites-available/myproject # Путь для сохранения конфигурации
+
+# Создание симлинка    
+- name: Enable website configuration
+  file:
+    src: /etc/nginx/sites-available/myproject
+    dest: /etc/nginx/sites-enabled/myproject
+    state: link
+
+# Включение конфигурации Nginx
+- name: Enable Nginx config
+  command: nginx -s reload  # Перезагружаем Nginx для применения новой конфигурации
+
+# Удаление конфигурации по умолчанию Nginx
+- name: Remove default Nginx site
+  file:
+    path: /etc/nginx/sites-enabled/default  # Путь к конфигурации по умолчанию
+    state: absent  # Удаляем конфигурацию по умолчанию

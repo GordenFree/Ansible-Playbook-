@@ -1,0 +1,8 @@
+# Основной playbook для развертывания Django
+- name: Deploy Django application stack
+  hosts: app_servers  # Указываем хосты из инвентаря
+  become: yes  # Получаем права суперпользователя для установки пакетов и служб
+  roles:
+    - postgresql  # Устанавливаем и настраиваем PostgreSQL
+    - django      # Устанавливаем и настраиваем Django
+    - nginx       # Устанавливаем и настраиваем Nginx

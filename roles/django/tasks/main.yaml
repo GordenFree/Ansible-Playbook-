@@ -1,0 +1,43 @@
+- name: Install system Django
+  apt:
+    name:
+      - python3-django  # Устанавливаем Django
+      - python3-djangorestframework   # Устанавливаем пакет разрабботки для Python
+    state: present
+    update_cache: yes 
+
+# Создание нового Django проекта
+- name: Create Django project
+  command: django-admin startproject myproject  # Команда для создания проекта
+  args:
+    chdir: /home/git  # Указываем каталог, в котором будет создан проект
+
+# Создание представления для проверки состояния (healthcheck)
+- name: Create healthcheck view
+  copy:
+    dest: /home/git/myproject/myproject/views.py  # Путь к файлу для создания
+    content: |
+      from django.http import JsonResponse
+      from django.urls import path
+      def healthcheck(request):
+          return JsonResponse({"status": "ok"})  # Возвращаем статус в формате JSON
+
+# Создание url для проверки состояния (healthcheck)
+- name: Create healthcheck url
+  copy:
+    dest: /home/git/myproject/myproject/urls.py  # Путь к файлу для создания
+    content: |
+      from django.contrib import admin
+      from django.urls import path
+      from .views import healthcheck
+
+      urlpatterns = [
+        path('admin/', admin.site.urls),
+        path('healthcheck/', healthcheck), # Настраиваем маршрут для healthcheck
+      ]
+
+# Запуск джанго
+- name: Run Django management command
+  command: python3 /home/git/myproject/manage.py runserver
+  become: yes
+      

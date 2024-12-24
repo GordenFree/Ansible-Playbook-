@@ -1,0 +1,44 @@
+# Установка зависимостей для Django
+- name: Install system dependencies
+  apt:
+    name:
+      - python3-pip  # Устанавливаем pip для Python3
+      - python3-dev   # Устанавливаем разработки пакета для Python
+      - libpq-dev     # Устанавливаем библиотеку для PostgreSQL
+      - python3-psycopg2
+      - acl
+    state: present
+    update_cache: yes  # Обновляем кэш перед установкой
+
+# Установка PostgreSQL
+- name: Install PostgreSQL
+  apt:
+    name: postgresql  # Устанавливаем сервер PostgreSQL
+    state: present
+    update_cache: yes  # Обновляем кэш перед установкой
+
+# Запуск и настройка автозапуска PostgreSQL
+- name: Start and enable PostgreSQL
+  systemd:
+    name: postgresql  # Указываем имя службы
+    state: started  # Убеждаемся, что служба запущена
+    enabled: yes    # Настраиваем автозапуск службы при загрузке системы
+
+# Создание базы данных для Django
+- name: Create database for Django
+  become: true
+  become_user: postgres
+  postgresql_db:
+    name: mydatabase  # Имя базы данных
+    state: present  # Убеждаемся, что база данных существует
+
+# Создание пользователя базы данных
+- name: Create database user
+  become: true
+  become_user: postgres
+  postgresql_user:
+    name: myuser        # Имя пользователя
+    password: mypassword  # Пароль
+    db: mydatabase      # База данных для назначения
+    state: present      # Убеждаемся, что пользователь существует
+    role_attr_flags: CREATEDB  # Назначаем права доступа
